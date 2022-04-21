@@ -193,9 +193,11 @@ class DataSet:
         # If the directory exists.
         if os.path.exists(dir):
             # Get all the filenames with matching extensions.
-            for filename in os.listdir(dir):
-                if filename.lower().endswith(self.exts):
-                    filenames.append(filename)
+            filenames.extend(
+                filename
+                for filename in os.listdir(dir)
+                if filename.lower().endswith(self.exts)
+            )
 
         return filenames
 
@@ -226,10 +228,7 @@ class DataSet:
             test_dir = ""
 
         for filename, cls in zip(filenames, class_numbers):
-            # Full path-name for the file.
-            path = os.path.join(self.in_dir, self.class_names[cls], test_dir, filename)
-
-            yield path
+            yield os.path.join(self.in_dir, self.class_names[cls], test_dir, filename)
 
     def get_training_set(self):
         """
@@ -297,8 +296,11 @@ class DataSet:
             # ['knifey-spoony/test/forky/',
             #  'knifey-spoony/test/knifey/',
             #  'knifey-spoony/test/spoony/']
-            class_dirs = [os.path.join(dst_dir, class_name + "/")
-                          for class_name in self.class_names]
+            class_dirs = [
+                os.path.join(dst_dir, f"{class_name}/")
+                for class_name in self.class_names
+            ]
+
 
             # Check if each class-directory exists, otherwise create it.
             for dir in class_dirs:
@@ -351,15 +353,9 @@ def load_cached(cache_path, in_dir):
         The DataSet-object.
     """
 
-    print("Creating dataset from the files in: " + in_dir)
+    print(f"Creating dataset from the files in: {in_dir}")
 
-    # If the object-instance for DataSet(in_dir=data_dir) already
-    # exists in the cache-file then reload it, otherwise create
-    # an object instance and save it to the cache-file for next time.
-    dataset = cache(cache_path=cache_path,
-                    fn=DataSet, in_dir=in_dir)
-
-    return dataset
+    return cache(cache_path=cache_path, fn=DataSet, in_dir=in_dir)
 
 
 ########################################################################
